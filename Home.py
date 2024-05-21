@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
+from io import BytesIO
+import urllib.request
 
 class HomePage:
     def __init__(self, root, controller):
@@ -27,6 +29,7 @@ class HomePage:
         self.search_button = None
         self.favorite_button = None
         self.email_button = None
+        self.flag_image = None
 
         # 실제 Create
         self.create_widgets()
@@ -47,15 +50,18 @@ class HomePage:
         self.listbox = tk.Listbox(self.nation_listbox_frame, yscrollcommand=self.scrollbar.set)
 
         # 나중에 읽어온 국가 명을 여기에 넣음
-        for i in range(50):
-            self.listbox.insert(tk.END, f"Country {i+1}")
+        for index, country in enumerate(self.controller.complete_country_list):
+            self.listbox.insert(tk.END, f"{country['country_name']}")
 
         self.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.scrollbar.config(command=self.listbox.yview)
+        # 리스트 박스 선택 이벤트 바인딩
+        self.listbox.bind('<<ListboxSelect>>', self.on_listbox_select)
 
         # 필터 입력창 생성
         self.filter_entry = ttk.Entry(self.frame)
-        self.filter_entry.insert(0, "국가 이름 필터")
+        # self.filter_entry.insert(0, "국가 이름 필터")
+        self.filter_entry.bind('<KeyRelease>', self.on_filter_entry_change)  # 필터 입력창 변경 시 이벤트 바인딩
 
         # 이미지 자리 표시 레이블 생성
         self.flag_label = tk.Label(self.flag_frame, text="국가 선택 시\n국기 표시\n(이미지)", bg='lightgray')
@@ -106,6 +112,36 @@ class HomePage:
         # 자리 표시 레이블 프레임에 추가a
         self.flag_label.pack(expand=True)
         self.map_label.pack(expand=True)
+
+    def on_filter_entry_change(self, event):
+        filter_text = self.filter_entry.get().lower()
+        self.listbox.delete(0, tk.END)
+        for country in self.controller.complete_country_list:
+            country_name = country['country_name'].lower()
+            if filter_text in country_name:
+                self.listbox.insert(tk.END, f"{country['country_name']}")
+
+    def on_listbox_select(self, event):
+        # 리스트 박스에서 선택된 항목 확인
+        selection = event.widget.curselection()
+        if selection:
+            index = selection[0]
+            filtered_countries = [country for country in self.controller.complete_country_list
+                                  if self.filter_entry.get().lower() in country['country_name'].lower()]
+            selected_country = filtered_countries[index]
+            url = selected_country['country_img_url']
+            with urllib.request.urlopen(url) as u:
+                raw_data = u.read()
+            im = Image.open(BytesIO(raw_data))
+
+            # 이미지 리사이즈
+            flag_width = self.flag_frame.winfo_width()
+            flag_height = self.flag_frame.winfo_height()
+            im = im.resize((flag_width, flag_height))
+
+            self.flag_image = ImageTk.PhotoImage(im)
+            self.flag_label.config(image=self.flag_image)
+            self.flag_label.image = self.flag_image  # 참조 유지
 
     def show(self):
         self.frame.place(x=0, y=0, width=self.width, height=self.height)
