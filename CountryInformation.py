@@ -4,6 +4,8 @@ from Favorite import *
 from Email import *
 
 import CountryInfoFetcher as Ci
+import os
+import WriteLatLon
 
 service_key = "TM2mB7BkLj7%2B1mK%2FbNgWbxjMPtdffuyVQbT46zhjwGtnC%2FEA6FQwymPyHVNcFFdJN%2FaQuqSYutGF33dW20COZg%3D%3D"
 
@@ -24,21 +26,42 @@ class CountryInfoGUI:
         self.fetcher = Ci.CountryInfoFetcher(service_key)
         basic_xml_data = self.fetcher.fetch_country_data(self.fetcher.basic_query)
         overview_json_data = self.fetcher.fetch_country_data(self.fetcher.overview_query)
+        accident_xml_data = self.fetcher.fetch_country_data(self.fetcher.accident_query)
+        warning_xml_data = self.fetcher.fetch_country_data(self.fetcher.warning_query)
+
         self.complete_country_list = None
         if basic_xml_data and overview_json_data:
             basic_country_list = self.fetcher.parse_basic_data(basic_xml_data)
-            overview_data = self.fetcher.parse_overview_data(overview_json_data)
-            self.complete_country_list = self.fetcher.merge_data(basic_country_list, overview_data)
-            # self.fetcher.print_country_data(self.complete_country_list)
+            overview_data_list = self.fetcher.parse_overview_data(overview_json_data)
+            accident_data_list = self.fetcher.parse_accident_data(accident_xml_data)
+            warning_data_list = self.fetcher.parse_warning_data(warning_xml_data)
+
+            self.complete_country_list = self.fetcher.merge_supplement_data(basic_country_list, overview_data_list)
+            self.complete_country_list = self.fetcher.merge_accident_data(self.complete_country_list, accident_data_list)
+            self.complete_country_list = self.fetcher.merge_warning_data(self.complete_country_list, warning_data_list)
 
         self.home_page = HomePage(self.root, self)
         self.search_page = SearchPage(self.root, self)
         self.favorite_page = FavoritePage(self.root, self)
         self.email_page = EmailPage(self.root, self)
 
-        # 관심국가 리스트
         self.favorite_list = []
+        # 관심 국가 리스트 (기본 관심 국가 설정)
+        for index, country in enumerate(self.complete_country_list):
+            if country['country_name'] in ['영국', '일본', '미국', '베트남', '프랑스']:
+                self.favorite_list.append(country['country_id'])
+                self.home_page.listbox.itemconfig(index, {'fg': 'lightblue'})
         self.home_page.show()
+
+        self.lat_lon = WriteLatLon.NationLatLon()
+        if not os.path.exists(self.lat_lon.output_file):
+            self.lat_lon.initialize_csv()
+            if not self.lat_lon.add_country_lat_lon(self.complete_country_list):
+                exit('Load Fail lat lon')
+        else:
+            print("load from csv")
+            self.lat_lon.load_lat_lon_from_csv()
+            self.lat_lon.print_all_country_lat_lon()
 
     def show_home_page(self):
         self.search_page.hide()
@@ -47,17 +70,42 @@ class CountryInfoGUI:
         self.home_page.show()
 
     def show_search_page(self):
-        selected_country = self.home_page.listbox.get(tk.ACTIVE)
-        self.search_page.detail_info_label.config(text=f"{selected_country} 정보 표시")
+        selected_country_index = self.home_page.selection_index
+        self.search_page.selected_country_index = selected_country_index
         self.home_page.hide()
         self.email_page.hide()
         self.search_page.show()
 
     def show_favorite_page(self):
-        self.search_page.hide()
-        self.home_page.hide()
-        self.email_page.hide()
-        self.favorite_page.show()
+        selected_country_id = self.home_page.selected_country['country_id']
+        # selected_country_index = self.home_page.selection_index
+        if selected_country_id in self.favorite_list:  # 관심 국가 해제
+            self.favorite_list.remove(selected_country_id)
+        else:
+            self.favorite_list.append(selected_country_id)
+            # self.favorite_page.selected_country_id = selected_country_id
+            self.search_page.hide()
+            self.home_page.hide()
+            self.email_page.hide()
+            self.favorite_page.show()
+
+        for index, country in enumerate(self.complete_country_list):
+            if country['country_id'] in self.favorite_list:
+                self.home_page.listbox.itemconfig(index, {'fg': 'lightblue'})
+            else:
+                self.home_page.listbox.itemconfig(index, {'fg': 'black'})
+
+    def release_favorite_page(self):
+        selected_country_id = self.home_page.selected_country['country_id']
+        if selected_country_id in self.favorite_list:  # 관심 국가 해제
+            self.favorite_list.remove(selected_country_id)
+
+        for index, country in enumerate(self.complete_country_list):
+            if country['country_id'] in self.favorite_list:
+                self.home_page.listbox.itemconfig(index, {'fg': 'lightblue'})
+            else:
+                self.home_page.listbox.itemconfig(index, {'fg': 'black'})
+
 
     def show_email_page(self):
         self.search_page.hide()

@@ -30,7 +30,8 @@ class HomePage:
         self.favorite_button = None
         self.email_button = None
         self.flag_image = None
-
+        self.selection_index = None
+        self.selected_country = None
         # 실제 Create
         self.create_widgets()
 
@@ -116,32 +117,46 @@ class HomePage:
     def on_filter_entry_change(self, event):
         filter_text = self.filter_entry.get().lower()
         self.listbox.delete(0, tk.END)
+        index = 0
         for country in self.controller.complete_country_list:
             country_name = country['country_name'].lower()
             if filter_text in country_name:
                 self.listbox.insert(tk.END, f"{country['country_name']}")
+                if country['country_id'] in self.controller.favorite_list:
+                    self.listbox.itemconfig(index, {'fg': 'lightblue'})
+                index += 1
 
     def on_listbox_select(self, event):
         # 리스트 박스에서 선택된 항목 확인
         selection = event.widget.curselection()
         if selection:
-            index = selection[0]
+            self.selection_index = selection[0]
             filtered_countries = [country for country in self.controller.complete_country_list
                                   if self.filter_entry.get().lower() in country['country_name'].lower()]
-            selected_country = filtered_countries[index]
-            url = selected_country['country_img_url']
-            with urllib.request.urlopen(url) as u:
-                raw_data = u.read()
-            im = Image.open(BytesIO(raw_data))
+            self.selected_country = filtered_countries[self.selection_index]
 
-            # 이미지 리사이즈
-            flag_width = self.flag_frame.winfo_width()
-            flag_height = self.flag_frame.winfo_height()
-            im = im.resize((flag_width, flag_height))
+            for index, country in enumerate(self.controller.complete_country_list):
+                if country['country_name'] == self.selected_country['country_name']:
+                    self.selection_index = index
 
-            self.flag_image = ImageTk.PhotoImage(im)
-            self.flag_label.config(image=self.flag_image)
-            self.flag_label.image = self.flag_image  # 참조 유지
+            self.on_image_select()
+
+            self.controller.lat_lon.print_country_lat_lon(self.selected_country)
+
+    def on_image_select(self):
+        url = self.selected_country['country_img_url']
+        with urllib.request.urlopen(url) as u:
+            raw_data = u.read()
+        im = Image.open(BytesIO(raw_data))
+
+        # 이미지 리사이즈
+        flag_width = self.flag_frame.winfo_width()
+        flag_height = self.flag_frame.winfo_height()
+        im = im.resize((flag_width, flag_height))
+
+        self.flag_image = ImageTk.PhotoImage(im)
+        self.flag_label.config(image=self.flag_image)
+        self.flag_label.image = self.flag_image  # 참조 유지
 
     def show(self):
         self.frame.place(x=0, y=0, width=self.width, height=self.height)

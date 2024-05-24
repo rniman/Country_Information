@@ -37,7 +37,7 @@ class FavoritePage:
 
         self.home_button = ttk.Button(self.frame, image=self.home_icon, command=self.controller.show_home_page)
         # 관심국가에서 해당 버튼은 관심국가 해제를 하는 것
-        self.favorite_button = ttk.Button(self.frame, image=self.star_icon, command=self.controller.show_favorite_page)
+        self.favorite_button = ttk.Button(self.frame, image=self.star_icon, command=self.controller.release_favorite_page)
         self.email_button = ttk.Button(self.frame, image=self.email_icon, command=self.controller.show_email_page)
 
         self.place_widgets()

@@ -52,9 +52,7 @@ class EmailPage:
         self.listbox_scrollbar = tk.Scrollbar(self.favorite_nation_listbox_frame)
         self.listbox_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.listbox = tk.Listbox(self.favorite_nation_listbox_frame, yscrollcommand=self.listbox_scrollbar.set)
-        # 나중에 읽어온 국가명을 여기에 넣음
-        for i in range(50):
-            self.listbox.insert(tk.END, f"Country {i+1}")
+
         self.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.listbox_scrollbar.config(command=self.listbox.yview)
 
@@ -117,6 +115,11 @@ class EmailPage:
 
     def show(self):
         self.frame.place(x=0, y=0, width=self.width, height=self.height)
+        # 나중에 읽어온 국가명을 여기에 넣음
+        self.listbox.delete(0, tk.END)
+        for index, country in enumerate(self.controller.complete_country_list):
+            if country['country_id'] in self.controller.favorite_list:
+                self.listbox.insert(tk.END, f"{country['country_name']}")
 
     def hide(self):
         self.frame.place_forget()
