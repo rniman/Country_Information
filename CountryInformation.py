@@ -58,9 +58,6 @@ class CountryInfoGUI:
             # print("{0} {1}: ({2}, {3})".format(index, country['country_name'], gu_center['lat'], gu_center['lng']))
         self.home_page.show()
 
-
-
-
     def show_home_page(self):
         self.search_page.hide()
         self.favorite_page.hide()

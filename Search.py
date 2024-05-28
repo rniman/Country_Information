@@ -1,8 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
+import io
 from io import BytesIO
 import urllib.request
+import requests
 
 class SearchPage:
     MAX_PAGE = 3
@@ -34,8 +36,10 @@ class SearchPage:
         self.home_button = None
         self.favorite_button = None
         self.email_button = None
+        self.zoom_in_button = None
+        self.zoom_out_button = None
         self.selected_country_index = None
-
+        self.zoom = 3
         self.create_widgets()
 
     def create_widgets(self):
@@ -62,6 +66,8 @@ class SearchPage:
         self.home_button = ttk.Button(self.frame, image=self.home_icon, command=self.controller.show_home_page)
         self.favorite_button = ttk.Button(self.frame, image=self.star_icon, command=self.controller.show_favorite_page)
         self.email_button = ttk.Button(self.frame,image=self.email_icon, command=self.controller.show_email_page)
+        self.zoom_in_button = ttk.Button(self.map_frame, text="+", command=self.zoom_in_map)
+        self.zoom_out_button = ttk.Button(self.map_frame, text="-", command=self.zoom_out_map)
 
         self.place_widgets()
 
@@ -103,6 +109,11 @@ class SearchPage:
         self.favorite_button.place(x=250, y=425, width=75, height=75)
         self.email_button.place(x=325, y=425, width=75, height=75)
 
+        self.zoom_in_button.place(x=int(float(self.width) * 0.5) - 20, y=int(float(self.height) * 0.4) - 20,
+                               width=20, height=20)
+        self.zoom_out_button.place(x=0, y=int(float(self.height) * 0.4) - 20,
+                               width=20, height=20)
+
     def prev_page(self):
         self.page -= 1
         if self.page < 0:
@@ -131,6 +142,39 @@ class SearchPage:
         self.flag_label.config(image=self.flag_image)
         self.flag_label.image = self.flag_image  # 참조 유지
 
+    def display_selected_map(self):
+        selected_country = self.controller.complete_country_list[self.selected_country_index]
+        gu_name = selected_country['country_name']
+        gu_center = self.controller.gmaps.geocode(f"{gu_name}")[0]['geometry']['location']
+        gu_map_url = f"https://maps.googleapis.com/maps/api/staticmap?center={gu_center['lat']}," \
+                     f"{gu_center['lng']}&zoom={self.zoom }&size=400x400&maptype=roadmap"
+
+        lat, lng = float(gu_center['lat']), float(gu_center['lng'])
+        marker_url = f"&markers=color:red%7C{lat},{lng}"
+        gu_map_url += marker_url
+
+        response = requests.get(gu_map_url + '&key=' + self.controller.Google_API_Key)
+        if response.status_code == 200:
+            try:
+                image = Image.open(io.BytesIO(response.content))
+                photo = ImageTk.PhotoImage(image)
+                self.map_label.configure(image=photo)
+                self.map_label.image = photo
+            except IOError as e:
+                print("Error: Unable to open image. Details:", e)
+        else:
+            print("Error: Unable to fetch image. Status code:", response.status_code)
+
+    def zoom_in_map(self):
+        if self.zoom < 10:
+            self.zoom += 1
+        self.display_selected_map()
+
+    def zoom_out_map(self):
+        if self.zoom > 2:
+            self.zoom -= 1
+        self.display_selected_map()
+
     def display_selected_info(self):
         self.detail_info_text.config(state='normal')
         self.detail_info_text.delete("1.0", tk.END)
@@ -150,6 +194,7 @@ class SearchPage:
     def show(self):
         self.frame.place(x=0, y=0, width=400, height=self.height)
         self.display_selected_flag()
+        self.display_selected_map()
         self.page = 0
         self.display_selected_info()
 

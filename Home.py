@@ -31,9 +31,12 @@ class HomePage:
         self.search_button = None
         self.favorite_button = None
         self.email_button = None
+        self.zoom_in_button = None
+        self.zoom_out_button = None
         self.flag_image = None
         self.selection_index = None
         self.selected_country = None
+        self.zoom = 3
         # 실제 Create
         self.create_widgets()
 
@@ -78,6 +81,9 @@ class HomePage:
         self.favorite_button = ttk.Button(self.frame,image=self.star_icon, command=self.controller.show_favorite_page)
         self.email_button = ttk.Button(self.frame, image=self.email_icon, command=self.controller.show_email_page)
 
+        self.zoom_in_button = ttk.Button(self.map_frame, text="+", command=self.zoom_in_map)
+        self.zoom_out_button = ttk.Button(self.map_frame, text="-", command=self.zoom_out_map)
+
         self.place_widgets()
 
     def load_image(self):
@@ -112,16 +118,20 @@ class HomePage:
         self.favorite_button.place(x=250, y=425, width=75, height=75)
         self.email_button.place(x=325, y=425, width=75, height=75)
 
+        self.zoom_in_button.place(x=int(float(self.width) * 0.7) - 20, y=int(float(self.height) * 0.4)-20,
+                                  width=20, height=20)
+        self.zoom_out_button.place(x=0, y=int(float(self.height) * 0.4)-20, width=20, height=20)
+
         # 자리 표시 레이블 프레임에 추가a
         self.flag_label.pack(expand=True)
         self.map_label.pack(expand=True)
 
     def update_map(self):
-        zoom = 2
+        # self.zoom = 2
         gu_name = self.selected_country['country_name']
         gu_center = self.controller.gmaps.geocode(f"{gu_name}")[0]['geometry']['location']
         gu_map_url = f"https://maps.googleapis.com/maps/api/staticmap?center={gu_center['lat']}," \
-                     f"{gu_center['lng']}&zoom={zoom}&size=400x400&maptype=roadmap"
+                     f"{gu_center['lng']}&zoom={self.zoom}&size=400x400&maptype=roadmap"
 
         lat, lng = float(gu_center['lat']), float(gu_center['lng'])
         marker_url = f"&markers=color:red%7C{lat},{lng}"
@@ -139,6 +149,16 @@ class HomePage:
                 print("Error: Unable to open image. Details:", e)
         else:
             print("Error: Unable to fetch image. Status code:", response.status_code)
+
+    def zoom_in_map(self):
+        if self.zoom < 10:
+            self.zoom += 1
+        self.update_map()
+
+    def zoom_out_map(self):
+        if self.zoom > 2:
+            self.zoom -= 1
+        self.update_map()
 
     def on_filter_entry_change(self, event):
         filter_text = self.filter_entry.get().lower()
