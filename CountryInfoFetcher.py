@@ -4,6 +4,7 @@ from html import unescape
 import re
 import json
 
+
 # def clean_html(raw_html):
 #     # HTML 엔터티 변환
 #     clean_text = unescape(raw_html)
@@ -27,6 +28,8 @@ class CountryInfoFetcher:
         self.overview_query = f"/1262000/OverviewGnrlInfoService/getOverviewGnrlInfoList?serviceKey={service_key}&numOfRows=200"
         self.accident_query = f"/1262000/AccidentService/getAccidentList?serviceKey={service_key}&numOfRows=200"
         self.warning_query = f"/1262000/TravelWarningService/getTravelWarningList?serviceKey={service_key}&numOfRows=200"
+
+
 
     def load_taiwan_flag_data(self):
         with open('TaiwanImageUrl.txt', 'r') as file:

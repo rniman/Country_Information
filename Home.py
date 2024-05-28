@@ -1,8 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
+import io
 from io import BytesIO
 import urllib.request
+import requests
 
 class HomePage:
     def __init__(self, root, controller):
@@ -114,6 +116,30 @@ class HomePage:
         self.flag_label.pack(expand=True)
         self.map_label.pack(expand=True)
 
+    def update_map(self):
+        zoom = 2
+        gu_name = self.selected_country['country_name']
+        gu_center = self.controller.gmaps.geocode(f"{gu_name}")[0]['geometry']['location']
+        gu_map_url = f"https://maps.googleapis.com/maps/api/staticmap?center={gu_center['lat']}," \
+                     f"{gu_center['lng']}&zoom={zoom}&size=400x400&maptype=roadmap"
+
+        lat, lng = float(gu_center['lat']), float(gu_center['lng'])
+        marker_url = f"&markers=color:red%7C{lat},{lng}"
+        gu_map_url += marker_url
+
+        # print("Map URL:", gu_map_url + '&key=' + self.controller.Google_API_Key)
+        response = requests.get(gu_map_url + '&key=' + self.controller.Google_API_Key)
+        if response.status_code == 200:
+            try:
+                image = Image.open(io.BytesIO(response.content))
+                photo = ImageTk.PhotoImage(image)
+                self.map_label.configure(image=photo)
+                self.map_label.image = photo
+            except IOError as e:
+                print("Error: Unable to open image. Details:", e)
+        else:
+            print("Error: Unable to fetch image. Status code:", response.status_code)
+
     def on_filter_entry_change(self, event):
         filter_text = self.filter_entry.get().lower()
         self.listbox.delete(0, tk.END)
@@ -140,8 +166,7 @@ class HomePage:
                     self.selection_index = index
 
             self.on_image_select()
-
-            self.controller.lat_lon.print_country_lat_lon(self.selected_country)
+            self.update_map()
 
     def on_image_select(self):
         url = self.selected_country['country_img_url']

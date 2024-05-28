@@ -5,8 +5,7 @@ from Email import *
 
 import CountryInfoFetcher as Ci
 import os
-import WriteLatLon
-
+from googlemaps import Client
 service_key = "TM2mB7BkLj7%2B1mK%2FbNgWbxjMPtdffuyVQbT46zhjwGtnC%2FEA6FQwymPyHVNcFFdJN%2FaQuqSYutGF33dW20COZg%3D%3D"
 
 FRAME_WIDTH = 400
@@ -21,6 +20,10 @@ class CountryInfoGUI:
 
         self.width = FRAME_WIDTH
         self.height = FRAME_HEIGHT
+
+        # Google Maps API 클라이언트 생성
+        self.Google_API_Key = 'AIzaSyCCnEO6srD6HY1jEoZqvDfH04T0ihv5uy8'
+        self.gmaps = Client(key=self.Google_API_Key)
 
         # XML, JSON 읽어오기
         self.fetcher = Ci.CountryInfoFetcher(service_key)
@@ -51,17 +54,12 @@ class CountryInfoGUI:
             if country['country_name'] in ['영국', '일본', '미국', '베트남', '프랑스']:
                 self.favorite_list.append(country['country_id'])
                 self.home_page.listbox.itemconfig(index, {'fg': 'lightblue'})
+            # gu_center = self.gmaps.geocode(country['country_name'])[0]['geometry']['location']
+            # print("{0} {1}: ({2}, {3})".format(index, country['country_name'], gu_center['lat'], gu_center['lng']))
         self.home_page.show()
 
-        self.lat_lon = WriteLatLon.NationLatLon()
-        if not os.path.exists(self.lat_lon.output_file):
-            self.lat_lon.initialize_csv()
-            if not self.lat_lon.add_country_lat_lon(self.complete_country_list):
-                exit('Load Fail lat lon')
-        else:
-            print("load from csv")
-            self.lat_lon.load_lat_lon_from_csv()
-            self.lat_lon.print_all_country_lat_lon()
+
+
 
     def show_home_page(self):
         self.search_page.hide()
