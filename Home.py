@@ -37,6 +37,8 @@ class HomePage:
         self.selection_index = None
         self.selected_country = None
         self.zoom = 3
+
+        self.filter_country = None
         # 실제 Create
         self.create_widgets()
 
@@ -163,10 +165,12 @@ class HomePage:
     def on_filter_entry_change(self, event):
         filter_text = self.filter_entry.get().lower()
         self.listbox.delete(0, tk.END)
+        self.filter_country = []
         index = 0
         for country in self.controller.complete_country_list:
             country_name = country['country_name'].lower()
             if filter_text in country_name:
+                self.filter_country.append(country)
                 self.listbox.insert(tk.END, f"{country['country_name']}")
                 if country['country_id'] in self.controller.favorite_list:
                     self.listbox.itemconfig(index, {'fg': 'lightblue'})

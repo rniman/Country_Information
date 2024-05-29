@@ -84,11 +84,18 @@ class CountryInfoGUI:
             self.email_page.hide()
             self.favorite_page.show()
 
-        for index, country in enumerate(self.complete_country_list):
-            if country['country_id'] in self.favorite_list:
-                self.home_page.listbox.itemconfig(index, {'fg': 'lightblue'})
-            else:
-                self.home_page.listbox.itemconfig(index, {'fg': 'black'})
+        if self.home_page.filter_country:
+            for index, country in enumerate(self.home_page.filter_country):
+                if country['country_id'] in self.favorite_list:
+                    self.home_page.listbox.itemconfig(index, {'fg': 'lightblue'})
+                else:
+                    self.home_page.listbox.itemconfig(index, {'fg': 'black'})
+        else:
+            for index, country in enumerate(self.complete_country_list):
+                if country['country_id'] in self.favorite_list:
+                    self.home_page.listbox.itemconfig(index, {'fg': 'lightblue'})
+                else:
+                    self.home_page.listbox.itemconfig(index, {'fg': 'black'})
 
     def release_favorite_page(self):
         selected_country_id = self.home_page.selected_country['country_id']
