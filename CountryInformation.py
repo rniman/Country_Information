@@ -65,6 +65,8 @@ class CountryInfoGUI:
         self.home_page.show()
 
     def show_search_page(self):
+        if not self.home_page.selected_country:
+            return
         selected_country_index = self.home_page.selection_index
         self.search_page.selected_country_index = selected_country_index
         self.home_page.hide()
@@ -72,6 +74,12 @@ class CountryInfoGUI:
         self.search_page.show()
 
     def show_favorite_page(self):
+        if not self.home_page.selected_country:
+            self.search_page.hide()
+            self.home_page.hide()
+            self.email_page.hide()
+            self.favorite_page.show()
+            return
         selected_country_id = self.home_page.selected_country['country_id']
         # selected_country_index = self.home_page.selection_index
         if selected_country_id in self.favorite_list:  # 관심 국가 해제
@@ -107,7 +115,6 @@ class CountryInfoGUI:
                 self.home_page.listbox.itemconfig(index, {'fg': 'lightblue'})
             else:
                 self.home_page.listbox.itemconfig(index, {'fg': 'black'})
-
 
     def show_email_page(self):
         self.search_page.hide()

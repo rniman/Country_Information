@@ -257,9 +257,9 @@ class CountryInfoFetcher:
         for country in basic_data:
             name = country["country_name"]
             if name in accident_data:
-                country["accident_info"] = "[외교부 사고 정보(2/3)]\n\n" + "".join(accident_data[name])
+                country["accident_info"] = "".join(accident_data[name])
             else:
-                country["accident_info"] = "[외교부 사고 정보(2/3)]\n\n정보 없음"
+                country["accident_info"] = "정보 없음"
 
             country["accident_info"] += str("\n\n-외교부_사건사고 현황-")
         return basic_data
@@ -280,11 +280,11 @@ class CountryInfoFetcher:
         for country in basic_data:
             name = country["country_name"]
             if name in warning_data:
-                country["warning_info"] = "[외교부 여행 경보(3/3)]\n\n"
+                country["warning_info"] = ""
                 for key, value in warning_data[name].items():
                     country["warning_info"] += str("{0}: {1}\n".format(warning_name_mapping[key], value))
             else:
-                country["warning_info"] = "[외교부 여행 경보(3/3)]\n\n정보 없음"
+                country["warning_info"] = "정보 없음"
 
             country["warning_info"] += str("\n\n-외교부_여행경보제도-")
         return basic_data

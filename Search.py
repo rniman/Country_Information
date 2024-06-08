@@ -57,6 +57,7 @@ class SearchPage:
         self.flag_label = tk.Label(self.flag_frame, text="국가 선택 시\n국기 표시\n(이미지)", bg='lightgray')
         self.map_label = tk.Label(self.map_frame, text="국가 선택 시\n지도 정보 표시\n(이미지)", bg='orange')
 
+        # 글꼴을 바꿔야지 \n같은 문자가 음표로 바뀌는 일이 없음
         self.detail_info_text = tk.Text(self.text_frame, font=("Helvetica", 8))
 
         self.prev_button = ttk.Button(self.page_button_frame, text="<<", command=self.prev_page)
@@ -144,7 +145,8 @@ class SearchPage:
 
     def display_selected_map(self):
         selected_country = self.controller.complete_country_list[self.selected_country_index]
-        gu_name = selected_country['country_name']
+        # gu_name = selected_country['country_name']
+        gu_name = selected_country['country_eng_name']
         gu_center = self.controller.gmaps.geocode(f"{gu_name}")[0]['geometry']['location']
         gu_map_url = f"https://maps.googleapis.com/maps/api/staticmap?center={gu_center['lat']}," \
                      f"{gu_center['lng']}&zoom={self.zoom }&size=400x400&maptype=roadmap"
@@ -180,14 +182,16 @@ class SearchPage:
         self.detail_info_text.delete("1.0", tk.END)
         selected_country = self.controller.complete_country_list[self.selected_country_index]
         if self.page == 0:  # 기본 정보
-            self.detail_info_text.insert(tk.END, "[외교부 국가별 기본정보(1/3)]\n")
+            self.detail_info_text.insert(tk.END, "[외교부 국가별 기본정보(1/3)]\n\n")
             self.detail_info_text.insert(tk.END, "선택 국가: {0}\n".format(selected_country['country_name']))
             self.detail_info_text.insert(tk.END, "인구수: {0}명\n".format(selected_country['population']))
             self.detail_info_text.insert(tk.END, "면적: {0}km^2\n\n".format(selected_country['area']))
             self.detail_info_text.insert(tk.END, selected_country['country_basic'])
         elif self.page == 1:  # 사건 사고
+            self.detail_info_text.insert(tk.END, "[외교부 사고 정보(2/3)]\n\n")
             self.detail_info_text.insert(tk.END, selected_country['accident_info'])
         else:
+            self.detail_info_text.insert(tk.END, "[외교부 여행 경보(3/3)]\n\n")
             self.detail_info_text.insert(tk.END, selected_country['warning_info'])
         self.detail_info_text.config(state='disabled')
 

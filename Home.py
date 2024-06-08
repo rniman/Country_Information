@@ -130,7 +130,9 @@ class HomePage:
 
     def update_map(self):
         # self.zoom = 2
-        gu_name = self.selected_country['country_name']
+
+        # gu_name = self.selected_country['country_name']
+        gu_name = self.selected_country['country_eng_name']
         gu_center = self.controller.gmaps.geocode(f"{gu_name}")[0]['geometry']['location']
         gu_map_url = f"https://maps.googleapis.com/maps/api/staticmap?center={gu_center['lat']}," \
                      f"{gu_center['lng']}&zoom={self.zoom}&size=400x400&maptype=roadmap"
