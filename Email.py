@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
+import mysmtplib
+from email.mime.base import MIMEBase
+from email.mime.text import MIMEText
 
 class EmailPage:
     def __init__(self, root, controller):
@@ -24,8 +27,10 @@ class EmailPage:
         self.info_text = None
         self.user_message_scrollbar = None
         self.message_text = None
-
         self.favorite_list = None
+
+        self.sender_addr = "shinmg00@tukorea.ac.kr"
+        self.sender_passwd = "ufjw djqt ffsy apln"
 
         self.create_widgets()
 
@@ -42,7 +47,7 @@ class EmailPage:
         self.home_button = ttk.Button(self.frame, image=self.home_icon, command=self.controller.show_home_page)
         self.email_address_entry = ttk.Entry(self.frame, width=200)
         # 여기서는 이메일을 직접 보내야함
-        self.email_button = ttk.Button(self.frame, image=self.email_icon, command=self.controller.show_email_page)
+        self.email_button = ttk.Button(self.frame, image=self.email_icon, command=self.send_email)
 
         self.place_widgets()
 
@@ -116,13 +121,37 @@ class EmailPage:
             self.info_text.config(state='normal')
             # 오른쪽 TEXT BOX에 정보 적기
             self.info_text.delete("1.0", tk.END)
-            self.info_text.insert(tk.END, "[국가명]: {0}".format(self.selected_country['country_name']))
+            self.info_text.insert(tk.END, "<국가명>: {0}\n".format(self.selected_country['country_name']))
+            self.info_text.insert(tk.END, "인구수: {0}명\n".format(self.selected_country['population']))
+            self.info_text.insert(tk.END, "면적: {0}km^2".format(self.selected_country['area']))
             self.info_text.insert(tk.END, "\n\n[기본 정보]\n")
             self.info_text.insert(tk.END, self.selected_country['country_basic'])
             self.info_text.insert(tk.END, "\n\n")
             self.info_text.insert(tk.END, "\n\n[사고 정보]\n{0}\n\n".format(self.selected_country['accident_info']))
             self.info_text.insert(tk.END, "\n\n[여행 경보]\n{0}\n\n".format(self.selected_country['warning_info']))
             self.info_text.config(state='disabled')
+
+    def send_email(self):
+        recipient_addr = self.email_address_entry.get()  # 입력된 이메일 주소 가져오기
+        subject = "Country Information"
+        body_info = self.info_text.get("1.0", tk.END).strip()  # 첫 번째 Text 위젯에서 메시지 가져오기
+        body_message = self.message_text.get("1.0", tk.END).strip()  # 두 번째 Text 위젯에서 메시지 가져오기
+        body = body_info + "\n\n<메시지>\n" + body_message  # 두 개의 텍스트를 이어 붙이기
+
+        msg = MIMEBase("multipart", "alternative")
+        msg['Subject'] = subject
+        msg['From'] = self.sender_addr
+        msg['To'] = recipient_addr
+        msg.attach(MIMEText(body, 'plain'))
+
+        s = mysmtplib.MySMTP("smtp.gmail.com", "587")
+        s.ehlo()
+        s.starttls()
+        s.ehlo()
+        s.login(self.sender_addr, self.sender_passwd)
+        s.sendmail(self.sender_addr, [recipient_addr], msg.as_string())
+        s.close()
+        print("Email sent successfully.")
 
     def show(self):
         self.favorite_list = []
