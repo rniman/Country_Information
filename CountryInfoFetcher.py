@@ -4,22 +4,6 @@ from html import unescape
 import re
 import json
 
-
-# def clean_html(raw_html):
-#     # HTML 엔터티 변환
-#     clean_text = unescape(raw_html)
-#     # <br> 태그를 줄바꿈 문자로 변환
-#     clean_text = re.sub(r'<br\s*/?>', '\n', clean_text)
-#     # 나머지 HTML 태그 제거
-#     clean_text = re.sub(r'<.*?>', '', clean_text)
-#     # 특정 특수 문자 제거 (예: 음표)
-#     clean_text = re.sub(r'[♪]', '', clean_text)
-#     # 기타 비 ASCII 문자 제거 (한글 및 공백은 유지)
-#     clean_text = re.sub(r'[^\x00-\x7F가-힣ㄱ-ㅎㅏ-ㅣ\s]', '', clean_text)
-#     # 불필요한 공백 제거
-#     clean_text = clean_text.strip()
-#     return clean_text
-
 class CountryInfoFetcher:
     def __init__(self, service_key):
         self.url = "apis.data.go.kr"
@@ -28,8 +12,6 @@ class CountryInfoFetcher:
         self.overview_query = f"/1262000/OverviewGnrlInfoService/getOverviewGnrlInfoList?serviceKey={service_key}&numOfRows=200"
         self.accident_query = f"/1262000/AccidentService/getAccidentList?serviceKey={service_key}&numOfRows=200"
         self.warning_query = f"/1262000/TravelWarningService/getTravelWarningList?serviceKey={service_key}&numOfRows=200"
-
-
 
     def load_taiwan_flag_data(self):
         with open('TaiwanImageUrl.txt', 'r') as file:
@@ -131,18 +113,6 @@ class CountryInfoFetcher:
             all_info['limitaNote'] = item.findtext("limitaNote", default="N/A")
             all_info['imgUrl2'] = item.findtext("imgUrl2", default="N/A")
 
-            # control = item.findtext("control", default="N/A")
-            # control_partial = item.findtext("controlPartial", default="N/A")
-            # control_note = item.findtext("controlNote", default="N/A")
-            #
-            # attention = item.findtext("attention", default="N/A")
-            # attention_partial = item.findtext("attentionPartial", default="N/A")
-            # attention_note = item.findtext("attentionNote", default="N/A")
-            #
-            # limita = item.findtext("limita", default="N/A")
-            # limita_partial = item.findtext("limitaPartial", default="N/A")
-            # limita_note = item.findtext("limitaNote", default="N/A")
-
             if country_name not in warning_data:
                 warning_data[country_name] = dict()
 
@@ -208,6 +178,8 @@ class CountryInfoFetcher:
             if mapped_name in overview_data:
                 country["population"] = overview_data[mapped_name].get("population", "N/A")
                 country["area"] = overview_data[mapped_name].get("area", "N/A")
+                if name == '우즈베키스탄':
+                    country["area"] = 448978
             elif name == '마카오':
                 country["population"], country["area"] = self.extract_additional_info(country['country_basic'])
                 country["population"] = 695200
@@ -215,42 +187,11 @@ class CountryInfoFetcher:
                 country["population"], country["area"] = self.extract_additional_info(country['country_basic'])
                 country["population"] = 7346000
             elif '교황청' in overview_data:
-                pass
-            # if name in overview_data:
-            #     country["population"] = overview_data[name].get("population", "N/A")
-            #     country["area"] = overview_data[name].get("area", "N/A")
-            # elif name == '가이아나공화국' and '가이아나' in overview_data:
-            #     country["population"] = overview_data['가이아나'].get("population", "N/A")
-            #     country["area"] = overview_data['가이아나'].get("area", "N/A")
-            # elif name == '네팔' and '네팔연방' in overview_data:
-            #     country["population"] = overview_data['네팔연방'].get("population", "N/A")
-            #     country["area"] = overview_data['네팔연방'].get("area", "N/A")
-            # elif name == '마이크로네시아' and '마이크로네시아연방' in overview_data:
-            #     country["population"] = overview_data['마이크로네시아연방'].get("population", "N/A")
-            #     country["area"] = overview_data['마이크로네시아연방'].get("area", "N/A")
-            # elif name == '미국' and '미합중국' in overview_data:
-            #     country["population"] = overview_data['미합중국'].get("population", "N/A")
-            #     country["area"] = overview_data['미합중국'].get("area", "N/A")
-            # elif name == '베네수엘라' and '베네수엘라볼리바르' in overview_data:
-            #     country["population"] = overview_data['베네수엘라볼리바르'].get("population", "N/A")
-            #     country["area"] = overview_data['베네수엘라볼리바르'].get("area", "N/A")
-            # elif name == '중앙아프리카공화국' and '중앙아프리카' in overview_data:
-            #     country["population"] = overview_data['중앙아프리카'].get("population", "N/A")
-            #     country["area"] = overview_data['중앙아프리카'].get("area", "N/A")
-            # elif name == '키르기스스탄' and '키르기즈공화국' in overview_data:
-            #     country["population"] = overview_data['키르기즈공화국'].get("population", "N/A")
-            #     country["area"] = overview_data['키르기즈공화국'].get("area", "N/A")
-            # elif name == '튀르키예' and '튀르키예공화국' in overview_data:
-            #     country["population"] = overview_data['튀르키예공화국'].get("population", "N/A")
-            #     country["area"] = overview_data['튀르키예공화국'].get("area", "N/A")
-            # elif name == '마카오':
-            #     country["population"], country["area"] = self.extract_additional_info(country['country_basic'])
-            #     country["population"] = 695200
-            # elif name == '홍콩':
-            #     country["population"], country["area"] = self.extract_additional_info(country['country_basic'])
-            #     country["population"] = 7346000
-            # elif '교황청' in overview_data:
-            #     pass
+                continue
+            else:
+                country["population"] = overview_data[name].get("population", "N/A")
+                country["area"] = overview_data[name].get("area", "N/A")
+
         return basic_data
 
     def merge_accident_data(self, basic_data, accident_data):

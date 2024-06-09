@@ -2,17 +2,25 @@ from Home import *
 from Search import *
 from Favorite import *
 from Email import *
+from TelegramBot import *
 
 import CountryInfoFetcher as Ci
 import os
 from googlemaps import Client
+import subprocess
+import threading
+
 service_key = spam.ret_service_key()
+token = spam.ret_token()
+user = spam.ret_user_id()
 
 FRAME_WIDTH = 400
 FRAME_HEIGHT = 500
 
 class CountryInfoGUI:
     def __init__(self, root):
+        self.telegram_program = None
+
         self.root = root
         self.root.title("Country Info")
         self.root.geometry("400x500")
@@ -47,6 +55,7 @@ class CountryInfoGUI:
         self.search_page = SearchPage(self.root, self)
         self.favorite_page = FavoritePage(self.root, self)
         self.email_page = EmailPage(self.root, self)
+        self.telegram = TelegramBot(self, token, service_key)
 
         self.favorite_list = []
         # 관심 국가 리스트 (기본 관심 국가 설정)
@@ -57,6 +66,12 @@ class CountryInfoGUI:
             # gu_center = self.gmaps.geocode(country['country_name'])[0]['geometry']['location']
             # print("{0} {1}: ({2}, {3})".format(index, country['country_name'], gu_center['lat'], gu_center['lng']))
         self.home_page.show()
+
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)  # 윈도우 닫기 이벤트에 핸들러 연결
+
+    def on_closing(self):
+        self.stop_telegram()
+        self.root.destroy()  # tkinter 애플리케이션 종료
 
     def show_home_page(self):
         self.search_page.hide()
@@ -121,6 +136,21 @@ class CountryInfoGUI:
         self.home_page.hide()
         self.favorite_page.hide()
         self.email_page.show()
+
+    def show_telegram(self):
+        telegram_path = os.path.join(os.getenv('APPDATA'), 'Telegram Desktop', 'Telegram.exe')
+        self.telegram_program = subprocess.Popen([telegram_path])
+        self.telegram.bot.sendMessage(user, 'Telegram Open')
+
+        # Telegram 봇 실행을 별도의 스레드에서 실행
+        self.telegram.run()
+
+    def stop_telegram(self):
+        if self.telegram:
+            self.telegram.stop()
+        if self.telegram_program:
+            self.telegram_program.terminate()
+            self.telegram_program = None
 
 if __name__ == "__main__":
     root = tk.Tk()

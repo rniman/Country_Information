@@ -27,10 +27,12 @@ class HomePage:
         self.search_icon = None
         self.star_icon = None
         self.email_icon = None
+        self.telegram_icon = None
         self.home_button = None
         self.search_button = None
         self.favorite_button = None
         self.email_button = None
+        self.telegram_button = None
         self.zoom_in_button = None
         self.zoom_out_button = None
         self.flag_image = None
@@ -82,6 +84,7 @@ class HomePage:
         self.search_button = ttk.Button(self.frame, image=self.search_icon, command=self.controller.show_search_page)
         self.favorite_button = ttk.Button(self.frame,image=self.star_icon, command=self.controller.show_favorite_page)
         self.email_button = ttk.Button(self.frame, image=self.email_icon, command=self.controller.show_email_page)
+        self.telegram_button = ttk.Button(self.frame, image=self.telegram_icon, command=self.controller.show_telegram)
 
         self.zoom_in_button = ttk.Button(self.map_frame, text="+", command=self.zoom_in_map)
         self.zoom_out_button = ttk.Button(self.map_frame, text="-", command=self.zoom_out_map)
@@ -105,6 +108,10 @@ class HomePage:
         email_icon = email_icon.resize((60, 60))
         self.email_icon = ImageTk.PhotoImage(email_icon)
 
+        telegram_icon = Image.open("Resource/Telegram_icon.png")
+        telegram_icon = telegram_icon.resize((60, 60))
+        self.telegram_icon = ImageTk.PhotoImage(telegram_icon)
+
     def place_widgets(self):
         # 위젯 배치
         self.nation_listbox_frame.place(x=0, y=0, width=int(float(self.width) * 0.3),
@@ -119,6 +126,7 @@ class HomePage:
         self.search_button.place(x=175, y=425, width=75, height=75)
         self.favorite_button.place(x=250, y=425, width=75, height=75)
         self.email_button.place(x=325, y=425, width=75, height=75)
+        self.telegram_button.place(x=75, y=425, width=75, height=75)
 
         self.zoom_in_button.place(x=int(float(self.width) * 0.7) - 20, y=int(float(self.height) * 0.4)-20,
                                   width=20, height=20)

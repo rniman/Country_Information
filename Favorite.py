@@ -16,6 +16,7 @@ class FavoritePage:
         self.graph_canvas = None
         self.graph_scrollbar = None
         self.graph_page = 0
+        self.graph_title_label = None
         self.graph_label = None
 
         self.prev_button = None
@@ -38,6 +39,8 @@ class FavoritePage:
         self.graph_scrollbar = tk.Scrollbar(self.frame, orient=tk.HORIZONTAL)
         self.graph_canvas = tk.Canvas(self.graph_frame, width=self.width, height=int(float(self.height) * 0.6)
                                       , xscrollcommand=self.graph_scrollbar.set)
+
+        self.graph_title_label = tk.Label(self.graph_frame, text="", anchor='center')
         self.graph_label = tk.Label(self.frame, text="", bg='lightgray', anchor='center')
 
         self.prev_button = ttk.Button(self.frame, text="<<", command=self.on_prev_graph)
@@ -74,6 +77,7 @@ class FavoritePage:
         self.graph_scrollbar.config(command=self.graph_canvas.xview)
         self.graph_canvas.config(scrollregion=self.graph_canvas.bbox(tk.ALL))
 
+        self.graph_title_label.place(x=0, y=0, width=self.width, height=20)
         self.graph_label.place(x=0, y=325, width=self.width, height=50)
 
         self.prev_button.place(x=150, y=375, width=50, height=50)
@@ -108,7 +112,7 @@ class FavoritePage:
 
         width_offset = 50
         graph_width = 30
-        graph_top_padding = 10
+        graph_top_padding = 20
         graph_bottom_padding = 50
         favorite_num = len(self.favorite_list)
 
@@ -122,6 +126,7 @@ class FavoritePage:
             min_population = int(min_population_country['population'])
             min_country_name = min_population_country['country_name']
 
+            self.graph_title_label.config(text='<인구 수 그래프>')
             self.graph_label.config(text='최다 인구 국가:{0} - {1}명\n최소 인구 국가:{2} - {3}명'.format(
                 max_country_name, max_population, min_country_name, min_population))
         elif self.graph_page == 1:  # 면적
@@ -133,6 +138,7 @@ class FavoritePage:
             min_area = int(min_area_country['area'])
             min_area_name = min_area_country['country_name']
 
+            self.graph_title_label.config(text='<영토 면적 그래프>')
             self.graph_label.config(text='최대 면적 국가:{0} - {1}km^2\n최소 면적 국가:{2} - {3}km^2'.format(
                 max_country_name, max_area, min_area_name, min_area))
 
