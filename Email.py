@@ -4,6 +4,7 @@ from PIL import Image, ImageTk
 import mysmtplib
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
+import spam
 
 class EmailPage:
     def __init__(self, root, controller):
@@ -29,8 +30,8 @@ class EmailPage:
         self.message_text = None
         self.favorite_list = None
 
-        self.sender_addr = "shinmg00@tukorea.ac.kr"
-        self.sender_passwd = "ufjw djqt ffsy apln"
+        self.sender_addr = spam.ret_gmail_addr()
+        self.sender_passwd = spam.ret_passwd()
 
         self.create_widgets()
 

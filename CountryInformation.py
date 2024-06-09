@@ -6,7 +6,7 @@ from Email import *
 import CountryInfoFetcher as Ci
 import os
 from googlemaps import Client
-service_key = "TM2mB7BkLj7%2B1mK%2FbNgWbxjMPtdffuyVQbT46zhjwGtnC%2FEA6FQwymPyHVNcFFdJN%2FaQuqSYutGF33dW20COZg%3D%3D"
+service_key = spam.ret_service_key()
 
 FRAME_WIDTH = 400
 FRAME_HEIGHT = 500
@@ -22,7 +22,7 @@ class CountryInfoGUI:
         self.height = FRAME_HEIGHT
 
         # Google Maps API 클라이언트 생성
-        self.Google_API_Key = 'AIzaSyCCnEO6srD6HY1jEoZqvDfH04T0ihv5uy8'
+        self.Google_API_Key = spam.ret_google_api_key()
         self.gmaps = Client(key=self.Google_API_Key)
 
         # XML, JSON 읽어오기
