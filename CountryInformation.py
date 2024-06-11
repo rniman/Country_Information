@@ -8,7 +8,6 @@ import CountryInfoFetcher as Ci
 import os
 from googlemaps import Client
 import subprocess
-import threading
 
 service_key = spam.ret_service_key()
 token = spam.ret_token()

@@ -118,24 +118,24 @@ class FavoritePage:
 
         if self.graph_page == 0:  # 인구수
             # 최대 인구와 해당 국가 이름을 동시에 계산
-            max_population_country = max(self.favorite_list, key=lambda country: int(country['population']))
-            max_population = int(max_population_country['population'])
+            max_population_country = max(self.favorite_list, key=lambda country: float(country['population']))
+            max_population = float(max_population_country['population'])
             max_country_name = max_population_country['country_name']
 
-            min_population_country = min(self.favorite_list, key=lambda country: int(country['population']))
-            min_population = int(min_population_country['population'])
+            min_population_country = min(self.favorite_list, key=lambda country: float(country['population']))
+            min_population = float(min_population_country['population'])
             min_country_name = min_population_country['country_name']
 
             self.graph_title_label.config(text='<인구 수 그래프>')
             self.graph_label.config(text='최다 인구 국가:{0} - {1}명\n최소 인구 국가:{2} - {3}명'.format(
                 max_country_name, max_population, min_country_name, min_population))
         elif self.graph_page == 1:  # 면적
-            max_area_country = max(self.favorite_list, key=lambda country: int(country['area']))
-            max_area = int(max_area_country['area'])
+            max_area_country = max(self.favorite_list, key=lambda country: float(country['area']))
+            max_area = float(max_area_country['area'])
             max_country_name = max_area_country['country_name']
 
-            min_area_country = min(self.favorite_list, key=lambda country: int(country['area']))
-            min_area = int(min_area_country['area'])
+            min_area_country = min(self.favorite_list, key=lambda country: float(country['area']))
+            min_area = float(min_area_country['area'])
             min_area_name = min_area_country['country_name']
 
             self.graph_title_label.config(text='<영토 면적 그래프>')
@@ -145,11 +145,11 @@ class FavoritePage:
         for index, country in enumerate(self.favorite_list):
             if self.graph_page == 0:  # 인구수
                 y1 = graph_top_padding + (c_height - graph_bottom_padding - graph_top_padding) * \
-                     (1 - int(country['population']) / max_population)
+                     (1 - float(country['population']) / max_population)
                 text_color = 'skyblue'
             elif self.graph_page == 1:  # 면적
                 y1 = graph_top_padding + (c_height - graph_bottom_padding - graph_top_padding) * \
-                     (1 - int(country['area']) / max_area)
+                     (1 - float(country['area']) / max_area)
                 text_color = 'orange'
 
             self.graph_canvas.create_rectangle(width_offset * index + width_offset / 2 - graph_width/2,
